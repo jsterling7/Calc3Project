@@ -1,5 +1,4 @@
 import Jama.*;
-import java.util.Arrays;
 
 public class HouseHolder {
 
