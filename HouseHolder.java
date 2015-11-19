@@ -6,13 +6,19 @@ public class HouseHolder {
     public static void main(String[] args) {
         double[][] test = {{1, 1, 1, 1}, {1, 2, 3, 4}, {1, 3, 6, 10}, {1, 4, 10, 20}};
         Matrix a = new Matrix(test);
-        qr_fact_househ(a);
+        TheResult results = qr_fact_househ(a);
+        System.out.println("The Q Matrix");
+        results.getQ().print(2, 2);
+        System.out.println("The R Matrix");
+        results.getR().print(2, 2);
+        System.out.println("ERROR: " + results.getError());
+
     }
 
     public static class TheResult {
         Matrix q;
         Matrix r;
-        long error;
+        double error;
 
         public Matrix getQ() {
             return q;
@@ -34,7 +40,7 @@ public class HouseHolder {
             return error;
         }
 
-        public void setError() {
+        public void setError(double error) {
             this.error = error;
         }
     }
@@ -44,9 +50,10 @@ public class HouseHolder {
         TheResult theResult = new TheResult();
         Matrix r = a;
         Matrix q = new Matrix(a.getRowDimension(), a.getColumnDimension());
+        Matrix error = new Matrix(a.getRowDimension(), a.getColumnDimension());
         int count = 0;
         for (int i = 0; i < a.getColumnDimension(); i++) {
-            Matrix subMatrix = a.getMatrix(i, a.getRowDimension() - 1, i, i);
+            Matrix subMatrix = r.getMatrix(i, a.getRowDimension() - 1, i, i);
             Matrix subsubMatrix = subMatrix.getMatrix(1, subMatrix.getRowDimension() - 1, 0, 0);
             double[] checkForZeros = subsubMatrix.getColumnPackedCopy();
             boolean zeros = true;
@@ -67,7 +74,7 @@ public class HouseHolder {
                 subMatrix.set(0, 0, firstElement);
                 Matrix identity = Matrix.identity(subMatrix.getRowDimension(), subMatrix.getRowDimension());
                 Matrix normSqr = subMatrix;
-                subMatrix = subMatrix.times(subMatrix.transpose());
+                subMatrix = multiply(subMatrix, subMatrix.transpose());
                 subMatrix.timesEquals(2);
                 double[] elements2 = normSqr.getColumnPackedCopy();
                 double mag2 = 0;
@@ -81,26 +88,59 @@ public class HouseHolder {
                 Matrix h = identity.minus(subMatrix);
                 Matrix identityH = Matrix.identity(a.getRowDimension(), a.getColumnDimension());
                 identityH.setMatrix(i, a.getRowDimension() - 1, i, a.getRowDimension() - 1, h);
-                System.out.println("H" + (i + 1));
-                identityH.print(2, 2);
-                System.out.println("R");
-                r.print(2, 2);
-                r = identityH.times(r);
+                r = multiply(identityH, r);
                 if (count == 0) {
                     q = identityH;
                 } else {
-                    q = q.times(identityH);
+                    q = multiply(q, identityH);
                 }
                 count++;
             }
         }
         theResult.setR(r);
         theResult.setQ(q);
-        System.out.println("R Final");
-        r.print(2, 2);
-        System.out.println("Q Final");
-        q.print(2, 2);
+        error = multiply(q, r);
+        error.minusEquals(a);
+        double theError = normInfinity(error);
+        theResult.setError(theError);
         return theResult;
 
+
+    }
+
+
+    public static double normInfinity(Matrix m) {
+		double[] ans = new double[m.getRowDimension()];
+		for(int i = 0; i < ans.length; i++) {
+			for(int j = 0; j < m.getColumnDimension(); j++) {
+				ans[i]+= Math.abs(m.get(i, j));
+			}
+		}
+		double answer = ans[0];
+		for(int i = 1; i < ans.length; i++) {
+			if(ans[i] > answer){
+				answer = ans[i];
+			}
+		}
+		return answer;
+	}
+
+
+
+    public static Matrix multiply(Matrix a, Matrix b) {
+        if(a.getColumnDimension() == b.getRowDimension()) {
+            Matrix ans = new Matrix(a.getRowDimension(), b.getColumnDimension());
+            for (int i = 0; i < ans.getRowDimension(); i++) {
+                for (int j = 0; j < ans.getColumnDimension(); j++) {
+                    for (int k = 0; k < a.getColumnDimension(); k++) {
+                        ans.set(i, j, ans.get(i, j) + (a.get(i, k) * b.get(k, j)));
+                    }
+                }
+            }
+            return ans;
+        }
+        else {
+            return null;
+        }
     }
 }
