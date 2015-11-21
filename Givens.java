@@ -3,7 +3,7 @@ public class Givens {
     static Matrix r;
     static double error;
 
-    public static void solve_qr_givens(Matrix a) {
+    public static void qr_fact_givens(Matrix a) {
         double[][] copy = a.getArrayCopy();
         q = Matrix.identity(a.getRowDimension(),a.getColumnDimension());
         r = a;
@@ -47,6 +47,29 @@ public class Givens {
         Matrix errorMatrix = multiply(q, r);
         errorMatrix.minusEquals(a);
         error = normInfinity(errorMatrix);
+        System.out.print("Q:");
+        q.print(7, 7);
+        System.out.print("R:");
+        r.print(7, 7);
+        System.out.println("Error: " + Givens.getError());
+    }
+    public static Matrix solve_qr_b(Matrix a, Matrix b) {
+        qr_fact_givens(a);
+        Matrix y = multiply(q.transpose(), b);
+        Matrix x = new Matrix(b.getRowDimension(), 1);
+//        x.set(b.getRowDimension() - 1, 0, (y.get(b.getRowDimension() - 1, 0) / r.get(b.getRowDimension() - 1, b.getRowDimension() - 1)));
+        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
+            double temp = y.get(i,0);
+            for (int j = i + 1; j < b.getRowDimension(); j++) {
+                 temp -= (r.get(i, j) * x.get(j, 0));
+            }
+            x.set(i, 0, temp/ r.get(i,i));
+        }
+        System.out.println("Y: ");
+        y.print(2, 3);
+        System.out.println("X: ");
+        x.print(2, 3);
+        return x;
     }
 
     public static Matrix getQ() {
