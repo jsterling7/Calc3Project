@@ -122,7 +122,7 @@ public class Jacobi {
     }
     
     public static void main(String[] args) {
-        Matrix approxTotal = Jacobi.calculateRandom();
+        Matrix approxTotal = calculateRandom();
         Matrix actualTotal = new Matrix(3,1);
         actualTotal.set(0, 0, (double) 9 / 190);
         actualTotal.set(1, 0, (double) 28 / 475);
