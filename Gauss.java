@@ -7,22 +7,29 @@ public class Gauss {
         Random random = new Random();
         double[] positions = new double[3];
         TheResult[] answers = new TheResult[100];
+        double[] initialErrors = new double[100];
+        double[] steps = new double[100];
         Matrix theAverage = new Matrix(3, 1);
+        double[][] exact = {{(double) 9 / 190}, {(double) 28 / 475}, {(double) 33 / 475}};
+        Matrix xExact = new Matrix(exact);
         int averageSteps = 0;
         int totalSteps = 0;
 
 
         for (int i = 0; i < initialVectors.length; i++) {
-            for (int j = 3; j < 3; j++) {
-                positions[i] = random.nextDouble();
+            for (int j = 0; j < 3; j++) {
+                positions[j] = random.nextDouble();
                 if (random.nextBoolean()) {
-                    positions[i] *= (double) (-1);
+                    positions[j] *= (double) (-1);
                 }
             }
             double[][] thePositions = {{positions[0]}, {positions[1]}, {positions[2]}};
             initialVectors[i] = new Matrix(thePositions);
+            Matrix initialError = initialVectors[i].minus(xExact);
+            initialErrors[i] = normInfinity(initialError);
             answers[i] = gs_iter(initialVectors[i], .00005, 100);
             theAverage.plusEquals(answers[i].getXSolution());
+            steps[i] = answers[i].getIterations();
             averageSteps += answers[i].getIterations();
             totalSteps += answers[i].getIterations();
         }
@@ -35,12 +42,23 @@ public class Gauss {
         System.out.println("The Total Steps");
         System.out.println(totalSteps);
 
-        double[][] exact = {{(double) 9 / 190}, {(double) 28 / 475}, {(double) 33 / 475}};
-        Matrix xExact = new Matrix(exact);
         Matrix error = theAverage.minus(xExact);
         double theError = normInfinity(error);
         System.out.println("The Error");
         System.out.println(theError);
+        // System.out.println("The initial Matrix");
+        // for (int i = 0; i < steps.length; i++) {
+        //     initialVectors[i].print(2, 2);
+        // }
+        System.out.println("The initial errors");
+        for (int i = 0; i < steps.length; i++) {
+            System.out.println(initialErrors[i]);
+        }
+
+        System.out.println("The steps");
+        for (int i = 0; i < steps.length; i++) {
+            System.out.println(steps[i]);
+        }
     }
 
     public static class TheResult {
