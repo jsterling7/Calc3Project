@@ -1,14 +1,46 @@
 import Jama.*;
+import java.util.Random;
 
 public class Gauss {
     public static void main(String[] args) {
-        double[][] test = {{0}, {0}, {0}};
-        Matrix a = new Matrix(test);
-        TheResult results = gs_iter(a, .00005, 100);
-        System.out.println("The X Solution");
-        results.getXSolution().print(2, 10);
-        System.out.println("Number of Iterations");
-        System.out.println(results.getIterations());
+        Matrix[] initialVectors = new Matrix[100];
+        Random random = new Random();
+        double[] positions = new double[3];
+        TheResult[] answers = new TheResult[100];
+        Matrix theAverage = new Matrix(3, 1);
+        int averageSteps = 0;
+        int totalSteps = 0;
+
+
+        for (int i = 0; i < initialVectors.length; i++) {
+            for (int j = 3; j < 3; j++) {
+                positions[i] = random.nextDouble();
+                if (random.nextBoolean()) {
+                    positions[i] *= (double) (-1);
+                }
+            }
+            double[][] thePositions = {{positions[0]}, {positions[1]}, {positions[2]}};
+            initialVectors[i] = new Matrix(thePositions);
+            answers[i] = gs_iter(initialVectors[i], .00005, 100);
+            theAverage.plusEquals(answers[i].getXSolution());
+            averageSteps += answers[i].getIterations();
+            totalSteps += answers[i].getIterations();
+        }
+        System.out.println("The Average Answer X");
+        averageSteps /= (double) (100);
+        theAverage.timesEquals(((double) 1 /100));
+        theAverage.print(2, 10);
+        System.out.println("The Average Steps");
+        System.out.println(averageSteps);
+        System.out.println("The Total Steps");
+        System.out.println(totalSteps);
+
+        double[][] exact = {{(double) 9 / 190}, {(double) 28 / 475}, {(double) 33 / 475}};
+        Matrix xExact = new Matrix(exact);
+        Matrix error = theAverage.minus(xExact);
+        double theError = normInfinity(error);
+        System.out.println("The Error");
+        System.out.println(theError);
     }
 
     public static class TheResult {
@@ -43,7 +75,6 @@ public class Gauss {
 
         double[][] bArr = {{.1}, {.1}, {.1}};
         Matrix b = new Matrix(bArr);
-        b.print(2, 2);
 
         double[][] uArr = {{0, .5, one / three} ,  {0, 0, .25}, {0, 0, 0}};
         Matrix u = new Matrix(uArr);
@@ -52,8 +83,6 @@ public class Gauss {
         Matrix bMinuesuTimesx = b.minus(uTimesx);
         Matrix sol1 = multiply(lowTriMatrix, bMinuesuTimesx);
         Matrix sol2 = new Matrix(3 , 1);
-        sol1.print(2, 2);
-        sol2.print(2, 2);
 
 
         for (int i = 0; i < maxIterations; i++) {
