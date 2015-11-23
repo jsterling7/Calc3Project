@@ -46,20 +46,18 @@ public class Gauss {
         double theError = normInfinity(error);
         System.out.println("The Error");
         System.out.println(theError);
-        // System.out.println("The initial Matrix");
+        // System.out.println("The initial errors");
         // for (int i = 0; i < steps.length; i++) {
-        //     initialVectors[i].print(2, 2);
+        //     System.out.println(initialErrors[i]);
         // }
-        System.out.println("The initial errors");
-        for (int i = 0; i < steps.length; i++) {
-            System.out.println(initialErrors[i]);
-        }
-
-        System.out.println("The steps");
-        for (int i = 0; i < steps.length; i++) {
-            System.out.println(steps[i]);
-        }
+        //
+        // System.out.println("The steps");
+        // for (int i = 0; i < steps.length; i++) {
+        //     System.out.println(steps[i]);
+        // }
     }
+
+    public void runPrint 
 
     public static class TheResult {
         Matrix xSolution;
