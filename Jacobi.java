@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.NoSuchElementException;
 
 public class Jacobi {
@@ -28,11 +29,9 @@ public class Jacobi {
             Matrix t = multiply(d, (l.plus(u)).uminus());
             Matrix previous = current;
             current = multiply(t, current).plus(c);
+            iterations++;
             if (normInfinity(current.minus(previous)) < tolerance) {
                 toContinue = false;
-            }
-            else {
-                iterations++;
             }
         }
         if (iterations == maxIterations) {
@@ -43,6 +42,19 @@ public class Jacobi {
         xApprox.print(8,8);
         System.out.println("Total Iterations: " + iterations);
         return xApprox;
+    }
+
+    public static Matrix calculateRandom(Matrix a, Matrix c) {
+        Random randNum = new Random();
+        Matrix approxTotal = new Matrix(3,1);
+        for (int count = 0; count < 100; count++) {
+            Matrix random = new Matrix(3, 1);
+            for (int i = 0; i < 3; i++) {
+                random.set(i, 0, randNum.nextDouble() - randNum.nextDouble());
+            }
+            approxTotal.plus(Jacobi.jacobi_iter(a, c, random, 0.00005, 100));
+        }
+        return approxTotal;
     }
 
     public static void iterativeError(Matrix approx, Matrix actual) {
