@@ -4,9 +4,23 @@ import java.util.NoSuchElementException;
 public class Jacobi {
     private static Matrix xApprox;
 
-    public static Matrix jacobi_iter(Matrix a, Matrix c, Matrix xk, double tolerance, int maxIterations) {
+    public static Matrix jacobi_iter(Matrix xk, double tolerance, int maxIterations) {
         boolean toContinue = true;
         int iterations = 0;
+        Matrix a = new Matrix(3, 3);
+        a.set(0, 0, 1);
+        a.set(1, 0, (double) 1 / 2);
+        a.set(2, 0, (double) 1 / 3);
+        a.set(0, 1, (double) 1 / 2);
+        a.set(1, 1, 1);
+        a.set(2, 1, (double) 1 / 4);
+        a.set(0, 2, (double) 1 / 3);
+        a.set(1, 2, (double) 1 / 4);
+        a.set(2, 2, 1);
+        Matrix c = new Matrix(3, 1);
+        c.set(0, 0, 0.1);
+        c.set(1, 0, 0.1);
+        c.set(2, 0, 0.1);
         Matrix l = new Matrix(3, 3);
         Matrix d = new Matrix(3, 3);
         Matrix u = new Matrix(3 ,3);
@@ -44,7 +58,7 @@ public class Jacobi {
         return xApprox;
     }
 
-    public static Matrix calculateRandom(Matrix a, Matrix c) {
+    public static Matrix calculateRandom() {
         Random randNum = new Random();
         Matrix approxTotal = new Matrix(3,1);
         for (int count = 0; count < 100; count++) {
@@ -52,7 +66,7 @@ public class Jacobi {
             for (int i = 0; i < 3; i++) {
                 random.set(i, 0, randNum.nextDouble() - randNum.nextDouble());
             }
-            approxTotal.plus(Jacobi.jacobi_iter(a, c, random, 0.00005, 100));
+            approxTotal.plus(jacobi_iter(random, 0.00005, 100));
         }
         return approxTotal;
     }
@@ -105,6 +119,16 @@ public class Jacobi {
         } else {
             return null;
         }
+    }
+    
+    public static void main(String[] args) {
+        Matrix approxTotal = Jacobi.calculateRandom();
+        Matrix actualTotal = new Matrix(3,1);
+        actualTotal.set(0, 0, (double) 9 / 190);
+        actualTotal.set(1, 0, (double) 28 / 475);
+        actualTotal.set(2, 0, (double) 33 / 475);
+        System.out.println("");
+        iterativeError(approxTotal, actualTotal);
     }
 }
 
