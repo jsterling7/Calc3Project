@@ -144,5 +144,4 @@ public class Givens {
         b.set(3, 0, (double) 1 / 4);
         Givens.solve_qr_b(test, b);
     }
-    }
 }
