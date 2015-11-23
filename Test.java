@@ -1,5 +1,3 @@
-import java.util.Random;
-
 public class Test {
     public static void main(String[] args) {
         Matrix test = new Matrix(new double[4][4]);
@@ -19,8 +17,6 @@ public class Test {
         test.set(1, 3, 4);
         test.set(2, 3, 10);
         test.set(3, 3, 20);
-        System.out.print("Original:");
-        test.print(7, 7);
         Givens.qr_fact_givens(test);
         Matrix b = new Matrix(new double [4][1]);
         b.set(0, 0, 1);
@@ -43,15 +39,7 @@ public class Test {
         c.set(0, 0, 0.1);
         c.set(1, 0, 0.1);
         c.set(2, 0, 0.1);
-        Random randNum = new Random();
-        Matrix approxTotal = new Matrix(3,1);
-        for (int count = 0; count < 100; count++) {
-            Matrix random = new Matrix(3, 1);
-            for (int i = 0; i < 3; i++) {
-                random.set(i, 0, randNum.nextDouble() - randNum.nextDouble());
-            }
-            approxTotal.plus(Jacobi.jacobi_iter(a, c, random, 0.00005, 100));
-        }
+        Matrix approxTotal = Jacobi.calculateRandom(a, c);
         Matrix actualTotal = new Matrix(3,1);
         actualTotal.set(0, 0, (double) 9 / 190);
         actualTotal.set(1, 0, (double) 28 / 475);
