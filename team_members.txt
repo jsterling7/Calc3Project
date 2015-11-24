@@ -5,3 +5,18 @@ Joshua Sterling
 Kui Sit
 
 Mike Adams
+
+public static Matrix makeP(int n) {
+		Matrix ans = new Matrix(n,n);
+		for (int i = 0; i < n; i++) {
+			ans.set(i, 0, 1);
+			ans.set(0, i, 1);
+		}
+		for (int i = 1; i < n; i++) {
+			for (int j = 1; j < n; j++) {
+				double k = ans.get(i-1,j) + ans.get(i, j-1);
+				ans.set(i, j, k);
+			}
+		}
+		return ans;
+	}
