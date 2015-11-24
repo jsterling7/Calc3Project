@@ -234,7 +234,7 @@ public class ConvergenceIterativeMethods {
             // for (int i = 0; i < 3; i++) {
             //     random.set(i, 0, randNum.nextDouble() - randNum.nextDouble());
             // }
-            approxTotal.plus(jacobi_iter(random, 0.00005, 100));
+            approxTotal.plusEquals(jacobi_iter(random, 0.00005, 100));
         }
         return approxTotal;
     }
