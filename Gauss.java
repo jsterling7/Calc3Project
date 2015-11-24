@@ -57,7 +57,7 @@ public class Gauss {
         // }
     }
 
-    public void runPrint 
+    //public void runPrint
 
     public static class TheResult {
         Matrix xSolution;

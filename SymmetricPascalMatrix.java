@@ -1,10 +1,35 @@
-import jama.*;
+import Jama.Matrix;
 
 public class SymmetricPascalMatrix {
+    public static void main(String[] args) {
+        System.out.println("-------------------------------------------------");
+        System.out.println("THE LU DECOMPOSITION");
+        System.out.println("-------------------------------------------------");
+        luRun(false);
+        System.out.println("-------------------------------------------------");
+        System.out.println("THE HOUSEHOLDER QR FACTORIZATION");
+        System.out.println("-------------------------------------------------");
+        HouseHolderRun(false);
+        System.out.println("-------------------------------------------------");
+        System.out.println("THE GIVENS QR FACTORIZATION");
+        System.out.println("-------------------------------------------------");
+        givensRun();
+        System.out.println("-------------------------------------------------");
+        System.out.println("USING LU TO SOLVE Ax = b");
+        System.out.println("-------------------------------------------------");
+        luRun(true);
+        System.out.println("-------------------------------------------------");
+        System.out.println("USING HOUSEHOLDER TO SOLVE Ax = b");
+        System.out.println("-------------------------------------------------");
+        HouseHolderRun(true);
+    }
+
+    // ------------------------------------------------------------
     // LU
+    // ------------------------------------------------------------
     public static Matrix[] lu_fact(Matrix m) {
-		System.out.println("A = ");
-		m.print(2, 1);
+		// System.out.println("A = ");
+		// m.print(2, 1);
 		int n = m.getRowDimension();
 		double[][] l = new double[n][n];// lower
 		double[][] u = m.getArrayCopy();// upper
@@ -35,145 +60,44 @@ public class SymmetricPascalMatrix {
 		Matrix la = new Matrix(l);
 		Matrix ua = new Matrix(u);
 		Matrix[] ans = { la, ua };
-		System.out.println("L = ");
-		ans[0].print(2, 20);
-		System.out.println("U = ");
-		ans[1].print(2, 20);
-		System.out.println("L*U = ");
-		multiply(ans[0], ans[1]).print(2, 20);
-		System.out.println("||LU - A||inf = "
-				+ normInfinity(multiply(ans[0], ans[1]).minus(m)));
+		// System.out.println("L = ");
+		// ans[0].print(2, 2);
+		// System.out.println("U = ");
+		// ans[1].print(2, 2);
+		// System.out.println("L*U = ");
+		// multiply(ans[0], ans[1]).print(2, 2);
+		// System.out.println("The Error: ||LU - A||inf = "
+		// 		+ normInfinity(multiply(ans[0], ans[1]).minus(m)));
 		return ans;
 	}
 
-	public static Matrix solve_lu_b(Matrix m, Matrix b) {
-		Matrix[] ans = lu_fact(m);
-		Matrix l = ans[0];
-		Matrix u = ans[1];
-		Matrix y = new Matrix(b.getArray());
-		Matrix x = new Matrix(b.getRowDimension(), 1);
-		for (int i = 0; i < y.getRowDimension(); i++) {
-			double xx = b.get(i, 0);
-			for (int j = 0; j < i; j++) {
-				// System.out.println(l.get(i, j) + "   " + y.get(j, 0));
-				xx -= l.get(i, j) * y.get(j, 0);
-			}
-			y.set(i, 0, xx);
-		}
-		for (int i = x.getRowDimension() - 1; i >= 0; i--) {
-			// System.out.println("I iteration");
-			double xx = y.get(i, 0);
-			// System.out.println(xx);
-			for (int j = m.getColumnDimension() - 1; j > i; j--) {
-				xx -= u.get(i, j) * x.get(j, 0);
-				// System.out.println("i and j: " + i + "," + j + " " + u.get(i,
-				// j) + "  " + x.get(j, 0) + " " + xx);
-			}
-			x.set(i, 0, xx / u.get(i, i));
-		}
-		// System.out.println("Y: ");
-		// y.print(2, 3);
-		System.out.println("X: ");
-		x.print(2, 3);
-		return x;
-	}
-
-	public static Matrix multiply(Matrix a, Matrix b) {
-		if (a.getColumnDimension() == b.getRowDimension()) {
-			Matrix ans = new Matrix(a.getRowDimension(), b.getColumnDimension());
-			for (int i = 0; i < ans.getRowDimension(); i++) {
-				for (int j = 0; j < ans.getColumnDimension(); j++) {
-					for (int k = 0; k < a.getColumnDimension(); k++) {
-						ans.set(i, j,
-								ans.get(i, j) + (a.get(i, k) * b.get(k, j)));
-					}
-				}
-			}
-			return ans;
-		} else if (a.getColumnDimension() == 2 && a.getRowDimension() == 2) {
-			if (b.getRowDimension() == 2 && b.getColumnDimension() == 1) {
-				Matrix ans = new Matrix(2, 1);
-				ans.set(0, 0, (a.get(0, 0) * b.get(0, 0)) + (a.get(0, 1) * b.get(1, 0)));
-				ans.set(1, 0, (a.get(1, 0) * a.get(0, 0)) + (a.get(1, 1) * b.get(1, 0)));
-				return ans;
-			}
-			return null;
-		} else {
-			return null;
-		}
-	}
-
-	public static double normInfinity(Matrix m) {
-		double[] ans = new double[m.getRowDimension()];
-		for (int i = 0; i < ans.length; i++) {
-			for (int j = 0; j < m.getColumnDimension(); j++) {
-				ans[i] += Math.abs(m.get(i, j));
-				// System.out.println(ans[i]);
-			}
-		}
-		double answer = ans[0];
-		for (int i = 1; i < ans.length; i++) {
-			if (ans[i] > answer) {
-				answer = ans[i];
-			}
-		}
-		return answer;
-	}
-
-	public static void main(String args[]) {
-		double[][] mat3 = { { 1, 1, 1, 1 }, { 1, 2, 3, 4 }, { 1, 3, 6, 10 },
+	public static void luRun(boolean solve) {
+        double[][] mat3 = { { 1, 1, 1, 1 }, { 1, 2, 3, 4 }, { 1, 3, 6, 10 },
 				{ 1, 4, 10, 20 } };
 		Matrix m = new Matrix(mat3);
+        Matrix[] ans = lu_fact(m);
+        if (!solve) {
+            System.out.println("L = ");
+    		ans[0].print(2, 2);
+    		System.out.println("U = ");
+    		ans[1].print(2, 2);
+    		// System.out.println("L*U = ");
+    		// multiply(ans[0], ans[1]).print(2, 2);
+    		System.out.println("ERROR: ||LU - A||∞ = "
+    				+ normInfinity(multiply(ans[0], ans[1]).minus(m)));
+        }
 		double[][] b2 = { { 1 }, { .5 }, { 1.0 / 3.0 }, { (1.0 / 4.0) } };
 		// System.out.println(b2[2][0]);
 		Matrix b = new Matrix(b2);
-		solve_lu_b(m, b);
+        if (solve) {
+            Matrix x = solve_lu_b(m, b);
+            System.out.println("X: ");
+    		x.print(2, 3);
+        }
 	}
-    //--------------------------------------------
-    //HouseHolder
-
-    public static void main(String[] args) {
-        double[][] test = {{1, 1, 1, 1}, {1, 2, 3, 4}, {1, 3, 6, 10}, {1, 4, 10, 20}};
-        Matrix a = new Matrix(test);
-        TheResult results = qr_fact_househ(a);
-        System.out.println("The Q Matrix");
-        results.getQ().print(2, 2);
-        System.out.println("The R Matrix");
-        results.getR().print(2, 2);
-        System.out.println("ERROR: " + results.getError());
-
-    }
-
-    private static class TheResult {
-        Matrix q;
-        Matrix r;
-        double error;
-
-        public Matrix getQ() {
-            return q;
-        }
-
-        public void setQ(Matrix q) {
-            this.q = q;
-        }
-
-        public Matrix getR() {
-            return r;
-        }
-
-        public void setR(Matrix r) {
-            this.r = r;
-        }
-
-        public double getError() {
-            return error;
-        }
-
-        public void setError(double error) {
-            this.error = error;
-        }
-    }
-
+    // ------------------------------------------------------------
+    // HouseHolder
+    // ------------------------------------------------------------
 
     public static TheResult qr_fact_househ(Matrix a) {
         TheResult theResult = new TheResult();
@@ -233,22 +157,46 @@ public class SymmetricPascalMatrix {
         double theError = normInfinity(error);
         theResult.setError(theError);
         return theResult;
+    }
 
+    public static void HouseHolderRun(boolean solve) {
+        double[][] test = {{1, 1, 1, 1}, {1, 2, 3, 4}, {1, 3, 6, 10}, {1, 4, 10, 20}};
+        Matrix a = new Matrix(test);
+        TheResult results = qr_fact_househ(a);
+        if (!solve) {
+            System.out.println("Q =");
+            results.getQ().print(2, 2);
+            System.out.println("R =");
+            results.getR().print(2, 2);
+            System.out.println("ERROR: ||QR−A||∞ = " + results.getError());
+        }
+        if (solve) {
+            Matrix b = new Matrix(new double [4][1]);
+            b.set(0, 0, 1);
+            b.set(1, 0, (double) 1 / 2);
+            b.set(2, 0, (double) 1 / 3);
+            b.set(3, 0, (double) 1 / 4);
+            Matrix[] answers = solve_qr_b(a, b);
+            System.out.println("X: ");
+            answers[0].print(2, 3);
+            System.out.println("-------------------------------------------------");
+            System.out.println("USING GIVENS TO SOLVE Ax = b");
+            System.out.println("-------------------------------------------------");
+            System.out.println("X: ");
+            answers[1].print(2, 3);
+        }
 
     }
 
-
     // ------------------------------------------------------------
     // Givens
+    // ------------------------------------------------------------
 
-    static Matrix q;
-    static Matrix r;
-    static double error;
-
-    public static void qr_fact_givens(Matrix a) {
+    public static TheResult qr_fact_givens(Matrix a) {
+        TheResult theResult = new TheResult();
         double[][] copy = a.getArrayCopy();
-        q = Matrix.identity(a.getRowDimension(),a.getColumnDimension());
-        r = a;
+        Matrix q = Matrix.identity(a.getRowDimension(),a.getColumnDimension());
+        Matrix r = a;
         for (int currentColumn = 0; currentColumn < a.getColumnDimension(); currentColumn++) {
             for (int currentRow = currentColumn; currentRow < a.getRowDimension() - 1; currentRow++) {
                 Matrix newMatrix = new Matrix(a.getRowDimension(),a.getColumnDimension());
@@ -286,47 +234,17 @@ public class SymmetricPascalMatrix {
                 }
             }
         }
+        theResult.setQ(q);
+        theResult.setR(r);
         Matrix errorMatrix = multiply(q, r);
         errorMatrix.minusEquals(a);
-        error = normInfinity(errorMatrix);
-        System.out.print("Q:");
-        q.print(7, 7);
-        System.out.print("R:");
-        r.print(7, 7);
-        System.out.println("Error: " + Givens.getError());
-    }
-    public static Matrix solve_qr_b(Matrix a, Matrix b) {
-        qr_fact_givens(a);
-        Matrix y = multiply(q.transpose(), b);
-        Matrix x = new Matrix(b.getRowDimension(), 1);
-//        x.set(b.getRowDimension() - 1, 0, (y.get(b.getRowDimension() - 1, 0) / r.get(b.getRowDimension() - 1, b.getRowDimension() - 1)));
-        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
-            double temp = y.get(i,0);
-            for (int j = i + 1; j < b.getRowDimension(); j++) {
-                 temp -= (r.get(i, j) * x.get(j, 0));
-            }
-            x.set(i, 0, temp/ r.get(i,i));
-        }
-        System.out.println("Y: ");
-        y.print(2, 3);
-        System.out.println("X: ");
-        x.print(2, 3);
-        return x;
+        double error = normInfinity(errorMatrix);
+        theResult.setError(error);
+        return theResult;
     }
 
-    public static Matrix getQ() {
-        return q;
-    }
 
-    public static Matrix getR() {
-        return r;
-    }
-
-    public static double getError() {
-        return error;
-    }
-
-    public static void main(String[] args) {
+    public static void givensRun() {
         Matrix test = new Matrix(new double[4][4]);
         test.set(0, 0, 1);
         test.set(1, 0, 1);
@@ -344,20 +262,104 @@ public class SymmetricPascalMatrix {
         test.set(1, 3, 4);
         test.set(2, 3, 10);
         test.set(3, 3, 20);
-        Givens.qr_fact_givens(test);
-        Matrix b = new Matrix(new double [4][1]);
-        b.set(0, 0, 1);
-        b.set(1, 0, (double) 1 / 2);
-        b.set(2, 0, (double) 1 / 3);
-        b.set(3, 0, (double) 1 / 4);
-        Givens.solve_qr_b(test, b);
+        // if (!solve) {
+            TheResult answers = qr_fact_givens(test);
+            System.out.println("Q =");
+            answers.getQ().print(2, 2);
+            System.out.println("R =");
+            answers.getR().print(2, 2);
+            System.out.println("ERROR: ||QR−A||∞ = " + answers.getError());
+        // }
+        // if (solve) {
+            // Matrix b = new Matrix(new double [4][1]);
+            // b.set(0, 0, 1);
+            // b.set(1, 0, (double) 1 / 2);
+            // b.set(2, 0, (double) 1 / 3);
+            // b.set(3, 0, (double) 1 / 4);
+            // solve_qr_b(test, b);
+        // }
     }
 
+    // ------------------------------------------------------------
+    // Solve Ax = b
+    // ------------------------------------------------------------
 
+    public static Matrix solve_lu_b(Matrix m, Matrix b) {
+		Matrix[] ans = lu_fact(m);
+		Matrix l = ans[0];
+		Matrix u = ans[1];
+		Matrix y = new Matrix(b.getArray());
+		Matrix x = new Matrix(b.getRowDimension(), 1);
+		for (int i = 0; i < y.getRowDimension(); i++) {
+			double xx = b.get(i, 0);
+			for (int j = 0; j < i; j++) {
+				// System.out.println(l.get(i, j) + "   " + y.get(j, 0));
+				xx -= l.get(i, j) * y.get(j, 0);
+			}
+			y.set(i, 0, xx);
+		}
+		for (int i = x.getRowDimension() - 1; i >= 0; i--) {
+			// System.out.println("I iteration");
+			double xx = y.get(i, 0);
+			// System.out.println(xx);
+			for (int j = m.getColumnDimension() - 1; j > i; j--) {
+				xx -= u.get(i, j) * x.get(j, 0);
+				// System.out.println("i and j: " + i + "," + j + " " + u.get(i,
+				// j) + "  " + x.get(j, 0) + " " + xx);
+			}
+			x.set(i, 0, xx / u.get(i, i));
+		}
+		// System.out.println("Y: ");
+		// y.print(2, 3);
+		return x;
+	}
 
+    public static Matrix[] solve_qr_b(Matrix a, Matrix b) {
+        Matrix[] solutions = new Matrix[2];
+        TheResult answersHouseHolder = qr_fact_givens(a);
+        TheResult answersGivens = qr_fact_givens(a);
 
-    // ------------------------------------------------------
-    // Helper Methods
+        Matrix qHouse = answersHouseHolder.getQ();
+        Matrix rHouse = answersHouseHolder.getR();
+        Matrix qGivens = answersGivens.getQ();
+        Matrix rGivens = answersGivens.getR();
+        // For HouseHolder
+        Matrix y = multiply(qHouse.transpose(), b);
+        Matrix x = new Matrix(b.getRowDimension(), 1);
+        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
+            double temp = y.get(i,0);
+            for (int j = i + 1; j < b.getRowDimension(); j++) {
+                 temp -= (rHouse.get(i, j) * x.get(j, 0));
+            }
+            x.set(i, 0, temp/ rHouse.get(i,i));
+        }
+        solutions[0] = x;
+
+        // For Givens
+        y = multiply(qGivens.transpose(), b);
+        Matrix x2 = new Matrix(b.getRowDimension(), 1);
+    //        x.set(b.getRowDimension() - 1, 0, (y.get(b.getRowDimension() - 1, 0) / r.get(b.getRowDimension() - 1, b.getRowDimension() - 1)));
+        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
+            double temp = y.get(i,0);
+            for (int j = i + 1; j < b.getRowDimension(); j++) {
+                 temp -= (rGivens.get(i, j) * x.get(j, 0));
+            }
+            x2.set(i, 0, temp/ rGivens.get(i,i));
+        }
+        solutions[1] = x2;
+        // System.out.print("Q:");
+        // q.print(7, 7);
+        // System.out.print("R:");
+        // r.print(7, 7);
+        // System.out.println("Y: ");
+        // y.print(2, 3);
+        // System.out.println("Error: " + getError());
+        return solutions;
+    }
+
+    // ------------------------------------------------------------
+    // Helper Methods/Classes
+    // ------------------------------------------------------------
 
     public static double normInfinity(Matrix m) {
 		double[] ans = new double[m.getRowDimension()];
@@ -375,8 +377,6 @@ public class SymmetricPascalMatrix {
 		return answer;
 	}
 
-
-
     public static Matrix multiply(Matrix a, Matrix b) {
         if(a.getColumnDimension() == b.getRowDimension()) {
             Matrix ans = new Matrix(a.getRowDimension(), b.getColumnDimension());
@@ -393,4 +393,35 @@ public class SymmetricPascalMatrix {
             return null;
         }
     }
+
+    private static class TheResult {
+        Matrix q;
+        Matrix r;
+        double error;
+
+        public Matrix getQ() {
+            return q;
+        }
+
+        public void setQ(Matrix q) {
+            this.q = q;
+        }
+
+        public Matrix getR() {
+            return r;
+        }
+
+        public void setR(Matrix r) {
+            this.r = r;
+        }
+
+        public double getError() {
+            return error;
+        }
+
+        public void setError(double error) {
+            this.error = error;
+        }
+    }
+
 }
