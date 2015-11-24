@@ -1,7 +1,15 @@
 import Jama.Matrix;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+
 
 public class SymmetricPascalMatrix {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("-------------------------------------------------");
         System.out.println("THE LU DECOMPOSITION");
         System.out.println("-------------------------------------------------");
@@ -14,6 +22,28 @@ public class SymmetricPascalMatrix {
         System.out.println("THE GIVENS QR FACTORIZATION");
         System.out.println("-------------------------------------------------");
         givensRun();
+        System.out.println("-------------------------------------------------");
+        System.out.println("Solving Ax = b");
+        System.out.println("-------------------------------------------------");
+        Matrix augMatrix = readDat("Enter the .dat file name for the augumented matrix to solve using LU and QR: ");
+        double[][] aug = augMatrix.getArrayCopy();
+        double[][] bArray = new double[aug.length][1];
+        double[][] aArray = new double[aug.length][aug[0].length - 1];
+        for (int i = 0; i < aug.length; i++) {
+            for (int j = 0; j < aug[i].length; j++) {
+                if (j == aug[i].length - 1) {
+                    b[i][1] = aug[i][j];
+                } else {
+                    a[i][j] = aug[i][j];
+                }
+            }
+        }
+        Matrix b = new Matrix(bArray);
+        Matrix a = new Matrix (aArray);
+        TheResult resultsLU = solve_lu_b(a, b);
+        TheResult resultsQR = solve_qr_b(a, b);
+
+
         pxb();
     }
 
@@ -64,10 +94,11 @@ public class SymmetricPascalMatrix {
 		return ans;
 	}
 
-	public static void luRun() {
-        double[][] mat3 = { { 1, 1, 1, 1 }, { 1, 2, 3, 4 }, { 1, 3, 6, 10 },
-				{ 1, 4, 10, 20 } };
-		Matrix m = new Matrix(mat3);
+	public static void luRun() throws IOException {
+        // double[][] mat3 = { { 1, 1, 1, 1 }, { 1, 2, 3, 4 }, { 1, 3, 6, 10 },
+		// 		{ 1, 4, 10, 20 } };
+		// Matrix m = new Matrix(mat3);
+        Matrix m = readDat("Enter the .dat file name for the LU FACTORIZATION: ");
         Matrix[] ans = lu_fact(m);
         System.out.println("L = ");
 		ans[0].print(2, 2);
@@ -151,30 +182,14 @@ public class SymmetricPascalMatrix {
         return theResult;
     }
 
-    public static void HouseHolderRun() {
-        double[][] test = {{1, 1, 1, 1}, {1, 2, 3, 4}, {1, 3, 6, 10}, {1, 4, 10, 20}};
-        Matrix a = new Matrix(test);
+    public static void HouseHolderRun() throws IOException {
+        Matrix a = readDat("Enter the .dat file name for the HouseHolder QR Decomposition: ");
         TheResult results = qr_fact_househ(a);
             System.out.println("Q =");
             results.getQ().print(2, 2);
             System.out.println("R =");
             results.getR().print(2, 2);
             System.out.println("ERROR: ||QR−A||∞ = " + results.getError());
-        // if (solve) {
-        //     Matrix b = new Matrix(new double [4][1]);
-        //     b.set(0, 0, 1);
-        //     b.set(1, 0, (double) 1 / 2);
-        //     b.set(2, 0, (double) 1 / 3);
-        //     b.set(3, 0, (double) 1 / 4);
-        //     Matrix[] answers = solve_qr_b(a, b);
-        //     System.out.println("X: ");
-        //     answers[0].print(2, 3);
-        //     System.out.println("-------------------------------------------------");
-        //     System.out.println("USING GIVENS TO SOLVE Ax = b");
-        //     System.out.println("-------------------------------------------------");
-        //     System.out.println("X: ");
-        //     answers[1].print(2, 3);
-        // }
     }
 
     // ------------------------------------------------------------
@@ -233,31 +248,32 @@ public class SymmetricPascalMatrix {
     }
 
 
-    public static void givensRun() {
-        Matrix test = new Matrix(new double[4][4]);
-        test.set(0, 0, 1);
-        test.set(1, 0, 1);
-        test.set(2, 0, 1);
-        test.set(3, 0, 1);
-        test.set(0, 1, 1);
-        test.set(1, 1, 2);
-        test.set(2, 1, 3);
-        test.set(3, 1, 4);
-        test.set(0, 2, 1);
-        test.set(1, 2, 3);
-        test.set(2, 2, 6);
-        test.set(3, 2, 10);
-        test.set(0, 3, 1);
-        test.set(1, 3, 4);
-        test.set(2, 3, 10);
-        test.set(3, 3, 20);
+    public static void givensRun() throws IOException {
+        Matrix test = readDat("Enter the .dat file name for the Givens QR Decomposition: ");
+        // Matrix test = new Matrix(new double[4][4]);
+        // test.set(0, 0, 1);
+        // test.set(1, 0, 1);
+        // test.set(2, 0, 1);
+        // test.set(3, 0, 1);
+        // test.set(0, 1, 1);
+        // test.set(1, 1, 2);
+        // test.set(2, 1, 3);
+        // test.set(3, 1, 4);
+        // test.set(0, 2, 1);
+        // test.set(1, 2, 3);
+        // test.set(2, 2, 6);
+        // test.set(3, 2, 10);
+        // test.set(0, 3, 1);
+        // test.set(1, 3, 4);
+        // test.set(2, 3, 10);
+        // test.set(3, 3, 20);
         // if (!solve) {
-            TheResult answers = qr_fact_givens(test);
-            System.out.println("Q =");
-            answers.getQ().print(2, 2);
-            System.out.println("R =");
-            answers.getR().print(2, 2);
-            System.out.println("ERROR: ||QR−A||∞ = " + answers.getError());
+        TheResult answers = qr_fact_givens(test);
+        System.out.println("Q =");
+        answers.getQ().print(2, 2);
+        System.out.println("R =");
+        answers.getR().print(2, 2);
+        System.out.println("ERROR: ||QR−A||∞ = " + answers.getError());
         // }
         // if (solve) {
             // Matrix b = new Matrix(new double [4][1]);
@@ -364,51 +380,51 @@ public class SymmetricPascalMatrix {
         TheResult theResult = new TheResult();
         Matrix[] solutions = new Matrix[2];
         // LU
-        System.out.println("-------------------------------------------------");
-        System.out.println("USING LU TO SOLVE Px = b");
-        System.out.println("-------------------------------------------------");
-        for (int i = 2; i <= 12; i++) {
-            p = makeP(i);
-            b = makeB(i);
-            theResult = solve_lu_b(p, b);
-            error = multiply(p, theResult.getX());
-            error.minusEquals(b);
-            System.out.println("------------------");
-            System.out.println("n = " + i);
-            System.out.println("------------------\n");
-            System.out.println("Xsol =");
-            theResult.getX().print(2, 3);
-            System.out.println("ERROR: ||LU - P||∞ = " + theResult.getError());
-            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
-        }
-        System.out.println("-------------------------------------------------");
-        System.out.println("USING QR TO SOLVE Px = b");
-        System.out.println("-------------------------------------------------");
-        // HouseHolder
-        for (int i = 2; i <= 12; i++) {
-            p = makeP(i);
-            b = makeB(i);
-            theResult = solve_qr_b(p, b);
-            error = multiply(p, theResult.getXHouse());
-            error.minusEquals(b);
-            error2 = multiply(p, theResult.getXGivens());
-            error.minusEquals(b);
-            System.out.println("------------------");
-            System.out.println("n = " + i);
-            System.out.println("------------------\n");
-            System.out.println("HOUSEHOLDER");
-            System.out.println("-----------\n");
-            System.out.println("Xsol =");
-            theResult.getXHouse().print(2, 3);
-            System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorHouse());
-            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
-            System.out.println("GIVENS");
-            System.out.println("------\n");
-            System.out.println("Xsol =");
-            theResult.getXGivens().print(2, 3);
-            System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorGivens());
-            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error2) + "\n");
-        }
+        // System.out.println("-------------------------------------------------");
+        // System.out.println("USING LU TO SOLVE Px = b");
+        // System.out.println("-------------------------------------------------");
+        // for (int i = 2; i <= 12; i++) {
+        //     p = makeP(i);
+        //     b = makeB(i);
+        //     theResult = solve_lu_b(p, b);
+        //     error = multiply(p, theResult.getX());
+        //     error.minusEquals(b);
+        //     System.out.println("------------------");
+        //     System.out.println("n = " + i);
+        //     System.out.println("------------------\n");
+        //     System.out.println("Xsol =");
+        //     theResult.getX().print(2, 3);
+        //     System.out.println("ERROR: ||LU - P||∞ = " + theResult.getError());
+        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
+        // }
+        // System.out.println("-------------------------------------------------");
+        // System.out.println("USING QR TO SOLVE Px = b");
+        // System.out.println("-------------------------------------------------");
+        // // HouseHolder
+        // for (int i = 2; i <= 12; i++) {
+        //     p = makeP(i);
+        //     b = makeB(i);
+        //     theResult = solve_qr_b(p, b);
+        //     error = multiply(p, theResult.getXHouse());
+        //     error.minusEquals(b);
+        //     error2 = multiply(p, theResult.getXGivens());
+        //     error.minusEquals(b);
+        //     System.out.println("------------------");
+        //     System.out.println("n = " + i);
+        //     System.out.println("------------------\n");
+        //     System.out.println("HOUSEHOLDER");
+        //     System.out.println("-----------\n");
+        //     System.out.println("Xsol =");
+        //     theResult.getXHouse().print(2, 3);
+        //     System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorHouse());
+        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
+        //     System.out.println("GIVENS");
+        //     System.out.println("------\n");
+        //     System.out.println("Xsol =");
+        //     theResult.getXGivens().print(2, 3);
+        //     System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorGivens());
+        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error2) + "\n");
+        // }
     }
 
     // ------------------------------------------------------------
@@ -472,6 +488,45 @@ public class SymmetricPascalMatrix {
             return null;
         }
     }
+
+    public static Matrix readDat(String message) throws IOException{
+        Scanner sc = new Scanner(System.in);
+        System.out.print(message);
+        String fileName = sc.next();
+        File theFile = new File(fileName);
+        Scanner sc2 = new Scanner(theFile);
+        Scanner sc4 = new Scanner(theFile);
+        Scanner sc3;
+        int i = 0;
+        int j = 0;
+        int rows = 0;
+        int columns = 0;
+        while (sc2.hasNextLine()) {
+            rows++;
+            String line = sc2.nextLine();
+            if (columns == 0) {
+                sc3 = new Scanner(line);
+                while (sc3.hasNextDouble()) {
+                    sc3.nextDouble();
+                    columns++;
+                }
+            }
+        }
+        double[][] data = new double[rows][columns];
+        while (sc4.hasNextLine()) {
+            String line = sc4.nextLine();
+                sc3 = new Scanner(line);
+                while (sc3.hasNextDouble()) {
+                    data[i][j] = sc3.nextDouble();
+                    j++;
+                }
+                j = 0;
+                i++;
+        }
+        Matrix a = new Matrix(data);
+        return a;
+    }
+
 
     private static class TheResult {
         Matrix q;
