@@ -32,16 +32,27 @@ public class SymmetricPascalMatrix {
         for (int i = 0; i < aug.length; i++) {
             for (int j = 0; j < aug[i].length; j++) {
                 if (j == aug[i].length - 1) {
-                    b[i][1] = aug[i][j];
+                    bArray[i][0] = aug[i][j];
                 } else {
-                    a[i][j] = aug[i][j];
+                    aArray[i][j] = aug[i][j];
                 }
             }
         }
         Matrix b = new Matrix(bArray);
         Matrix a = new Matrix (aArray);
+        b.print(2,2);
+        a.print(2,2);
         TheResult resultsLU = solve_lu_b(a, b);
         TheResult resultsQR = solve_qr_b(a, b);
+        System.out.println("LU\n");
+        System.out.println("Xsol =");
+        resultsLU.getX().print(2, 3);
+        System.out.println("HouseHolder\n");
+        System.out.println("Xsol =");
+        resultsQR.getXHouse().print(2, 3);
+        System.out.println("Givens\n");
+        System.out.println("Xsol =");
+        resultsQR.getXGivens().print(2, 3);
 
 
         pxb();
@@ -380,51 +391,51 @@ public class SymmetricPascalMatrix {
         TheResult theResult = new TheResult();
         Matrix[] solutions = new Matrix[2];
         // LU
-        // System.out.println("-------------------------------------------------");
-        // System.out.println("USING LU TO SOLVE Px = b");
-        // System.out.println("-------------------------------------------------");
-        // for (int i = 2; i <= 12; i++) {
-        //     p = makeP(i);
-        //     b = makeB(i);
-        //     theResult = solve_lu_b(p, b);
-        //     error = multiply(p, theResult.getX());
-        //     error.minusEquals(b);
-        //     System.out.println("------------------");
-        //     System.out.println("n = " + i);
-        //     System.out.println("------------------\n");
-        //     System.out.println("Xsol =");
-        //     theResult.getX().print(2, 3);
-        //     System.out.println("ERROR: ||LU - P||∞ = " + theResult.getError());
-        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
-        // }
-        // System.out.println("-------------------------------------------------");
-        // System.out.println("USING QR TO SOLVE Px = b");
-        // System.out.println("-------------------------------------------------");
-        // // HouseHolder
-        // for (int i = 2; i <= 12; i++) {
-        //     p = makeP(i);
-        //     b = makeB(i);
-        //     theResult = solve_qr_b(p, b);
-        //     error = multiply(p, theResult.getXHouse());
-        //     error.minusEquals(b);
-        //     error2 = multiply(p, theResult.getXGivens());
-        //     error.minusEquals(b);
-        //     System.out.println("------------------");
-        //     System.out.println("n = " + i);
-        //     System.out.println("------------------\n");
-        //     System.out.println("HOUSEHOLDER");
-        //     System.out.println("-----------\n");
-        //     System.out.println("Xsol =");
-        //     theResult.getXHouse().print(2, 3);
-        //     System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorHouse());
-        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
-        //     System.out.println("GIVENS");
-        //     System.out.println("------\n");
-        //     System.out.println("Xsol =");
-        //     theResult.getXGivens().print(2, 3);
-        //     System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorGivens());
-        //     System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error2) + "\n");
-        // }
+        System.out.println("-------------------------------------------------");
+        System.out.println("USING LU TO SOLVE Px = b");
+        System.out.println("-------------------------------------------------");
+        for (int i = 2; i <= 12; i++) {
+            p = makeP(i);
+            b = makeB(i);
+            theResult = solve_lu_b(p, b);
+            error = multiply(p, theResult.getX());
+            error.minusEquals(b);
+            System.out.println("------------------");
+            System.out.println("n = " + i);
+            System.out.println("------------------\n");
+            System.out.println("Xsol =");
+            theResult.getX().print(2, 3);
+            System.out.println("ERROR: ||LU - P||∞ = " + theResult.getError());
+            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
+        }
+        System.out.println("-------------------------------------------------");
+        System.out.println("USING QR TO SOLVE Px = b");
+        System.out.println("-------------------------------------------------");
+        // HouseHolder
+        for (int i = 2; i <= 12; i++) {
+            p = makeP(i);
+            b = makeB(i);
+            theResult = solve_qr_b(p, b);
+            error = multiply(p, theResult.getXHouse());
+            error.minusEquals(b);
+            error2 = multiply(p, theResult.getXGivens());
+            error.minusEquals(b);
+            System.out.println("------------------");
+            System.out.println("n = " + i);
+            System.out.println("------------------\n");
+            System.out.println("HOUSEHOLDER");
+            System.out.println("-----------\n");
+            System.out.println("Xsol =");
+            theResult.getXHouse().print(2, 3);
+            System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorHouse());
+            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error) + "\n");
+            System.out.println("GIVENS");
+            System.out.println("------\n");
+            System.out.println("Xsol =");
+            theResult.getXGivens().print(2, 3);
+            System.out.println("ERROR: ||QR - P||∞ = " + theResult.getErrorGivens());
+            System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error2) + "\n");
+        }
     }
 
     // ------------------------------------------------------------
