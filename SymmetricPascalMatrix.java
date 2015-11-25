@@ -38,23 +38,33 @@ public class SymmetricPascalMatrix {
                 }
             }
         }
+        Matrix error = new Matrix(0, 0);
+        Matrix error2 = new Matrix(0, 0);
+        Matrix error3 = new Matrix(0, 0);
         Matrix b = new Matrix(bArray);
         Matrix a = new Matrix (aArray);
-        b.print(2,2);
-        a.print(2,2);
+        Matrix b2 = new Matrix(b.getArrayCopy());
+        Matrix a2 = new Matrix (a.getArrayCopy());
         TheResult resultsLU = solve_lu_b(a, b);
-        TheResult resultsQR = solve_qr_b(a, b);
+        TheResult resultsQR = solve_qr_b(a2, b2);
         System.out.println("LU\n");
         System.out.println("Xsol =");
         resultsLU.getX().print(2, 3);
+        error = multiply(a, resultsLU.getX());
+        error.minusEquals(b);
+        System.out.println("ERROR: ||AXsol - b||∞ = " + normInfinity(error) + "\n");
         System.out.println("HouseHolder\n");
         System.out.println("Xsol =");
         resultsQR.getXHouse().print(2, 3);
+        error2 = multiply(a, resultsQR.getXHouse());
+        error2.minusEquals(b);
+        System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error2) + "\n");
         System.out.println("Givens\n");
         System.out.println("Xsol =");
         resultsQR.getXGivens().print(2, 3);
-
-
+        error3 = multiply(a, resultsQR.getXGivens());
+        error3.minusEquals(b);
+        System.out.println("ERROR: ||PXsol - b||∞ = " + normInfinity(error3) + "\n");
         pxb();
     }
 
@@ -62,8 +72,6 @@ public class SymmetricPascalMatrix {
     // LU
     // ------------------------------------------------------------
     public static Matrix[] lu_fact(Matrix m) {
-		// System.out.println("A = ");
-		// m.print(2, 1);
 		int n = m.getRowDimension();
 		double[][] l = new double[n][n];// lower
 		double[][] u = m.getArrayCopy();// upper
@@ -89,45 +97,21 @@ public class SymmetricPascalMatrix {
 			c++;
 			r = c + 1;
 		}
-
-		// m.print(2,1);
 		Matrix la = new Matrix(l);
 		Matrix ua = new Matrix(u);
 		Matrix[] ans = { la, ua };
-		// System.out.println("L = ");
-		// ans[0].print(2, 2);
-		// System.out.println("U = ");
-		// ans[1].print(2, 2);
-		// System.out.println("L*U = ");
-		// multiply(ans[0], ans[1]).print(2, 2);
-		// System.out.println("The Error: ||LU - A||inf = "
-		// 		+ normInfinity(multiply(ans[0], ans[1]).minus(m)));
 		return ans;
 	}
 
 	public static void luRun() throws IOException {
-        // double[][] mat3 = { { 1, 1, 1, 1 }, { 1, 2, 3, 4 }, { 1, 3, 6, 10 },
-		// 		{ 1, 4, 10, 20 } };
-		// Matrix m = new Matrix(mat3);
         Matrix m = readDat("Enter the .dat file name for the LU FACTORIZATION: ");
         Matrix[] ans = lu_fact(m);
         System.out.println("L = ");
 		ans[0].print(2, 2);
 		System.out.println("U = ");
 		ans[1].print(2, 2);
-		// System.out.println("L*U = ");
-		// multiply(ans[0], ans[1]).print(2, 2);
 		System.out.println("ERROR: ||LU - A||∞ = "
 				+ normInfinity(multiply(ans[0], ans[1]).minus(m)));
-
-		// double[][] b2 = { { 1 }, { .5 }, { 1.0 / 3.0 }, { (1.0 / 4.0) } };
-		// // System.out.println(b2[2][0]);
-		// Matrix b = new Matrix(b2);
-        // if (solve) {
-        //     Matrix x = solve_lu_b(m, b);
-        //     System.out.println("X: ");
-    	// 	x.print(2, 3);
-        // }
 	}
     // ------------------------------------------------------------
     // HouseHolder
@@ -261,39 +245,12 @@ public class SymmetricPascalMatrix {
 
     public static void givensRun() throws IOException {
         Matrix test = readDat("Enter the .dat file name for the Givens QR Decomposition: ");
-        // Matrix test = new Matrix(new double[4][4]);
-        // test.set(0, 0, 1);
-        // test.set(1, 0, 1);
-        // test.set(2, 0, 1);
-        // test.set(3, 0, 1);
-        // test.set(0, 1, 1);
-        // test.set(1, 1, 2);
-        // test.set(2, 1, 3);
-        // test.set(3, 1, 4);
-        // test.set(0, 2, 1);
-        // test.set(1, 2, 3);
-        // test.set(2, 2, 6);
-        // test.set(3, 2, 10);
-        // test.set(0, 3, 1);
-        // test.set(1, 3, 4);
-        // test.set(2, 3, 10);
-        // test.set(3, 3, 20);
-        // if (!solve) {
         TheResult answers = qr_fact_givens(test);
         System.out.println("Q =");
         answers.getQ().print(2, 2);
         System.out.println("R =");
         answers.getR().print(2, 2);
         System.out.println("ERROR: ||QR−A||∞ = " + answers.getError());
-        // }
-        // if (solve) {
-            // Matrix b = new Matrix(new double [4][1]);
-            // b.set(0, 0, 1);
-            // b.set(1, 0, (double) 1 / 2);
-            // b.set(2, 0, (double) 1 / 3);
-            // b.set(3, 0, (double) 1 / 4);
-            // solve_qr_b(test, b);
-        // }
     }
 
     // ------------------------------------------------------------
@@ -310,24 +267,17 @@ public class SymmetricPascalMatrix {
 		for (int i = 0; i < y.getRowDimension(); i++) {
 			double xx = b.get(i, 0);
 			for (int j = 0; j < i; j++) {
-				// System.out.println(l.get(i, j) + "   " + y.get(j, 0));
 				xx -= l.get(i, j) * y.get(j, 0);
 			}
 			y.set(i, 0, xx);
 		}
 		for (int i = x.getRowDimension() - 1; i >= 0; i--) {
-			// System.out.println("I iteration");
 			double xx = y.get(i, 0);
-			// System.out.println(xx);
 			for (int j = m.getColumnDimension() - 1; j > i; j--) {
 				xx -= u.get(i, j) * x.get(j, 0);
-				// System.out.println("i and j: " + i + "," + j + " " + u.get(i,
-				// j) + "  " + x.get(j, 0) + " " + xx);
 			}
 			x.set(i, 0, xx / u.get(i, i));
 		}
-		// System.out.println("Y: ");
-		// y.print(2, 3);
 		theResult.setX(x);
         theResult.setError(normInfinity(multiply(ans[0], ans[1]).minus(m)));
         return theResult;
@@ -335,7 +285,7 @@ public class SymmetricPascalMatrix {
 
     public static TheResult solve_qr_b(Matrix a, Matrix b) {
         TheResult theResult = new TheResult();
-        TheResult answersHouseHolder = qr_fact_givens(a);
+        TheResult answersHouseHolder = qr_fact_househ(a);
         TheResult answersGivens = qr_fact_givens(a);
 
         Matrix qHouse = answersHouseHolder.getQ();
@@ -360,8 +310,6 @@ public class SymmetricPascalMatrix {
         // For Givens
         y = multiply(qGivens.transpose(), b);
         Matrix x2 = new Matrix(b.getRowDimension(), 1);
-    //        x.set(b.getRowDimension() - 1, 0, (y.get(b.getRowDimension() - 1, 0) / r.get(b.getRowDimension() - 1, b.getRowDimension() - 1)));
-        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
             double temp = y.get(i,0);
             for (int j = i + 1; j < b.getRowDimension(); j++) {
                  temp -= (rGivens.get(i, j) * x.get(j, 0));
@@ -369,13 +317,6 @@ public class SymmetricPascalMatrix {
             x2.set(i, 0, temp/ rGivens.get(i,i));
         }
         theResult.setXGivens(x2);
-        // System.out.print("Q:");
-        // q.print(7, 7);
-        // System.out.print("R:");
-        // r.print(7, 7);
-        // System.out.println("Y: ");
-        // y.print(2, 3);
-        // System.out.println("Error: " + getError());
         return theResult;
     }
 
@@ -396,9 +337,10 @@ public class SymmetricPascalMatrix {
         System.out.println("-------------------------------------------------");
         for (int i = 2; i <= 12; i++) {
             p = makeP(i);
+            Matrix pCopy = new Matrix(p.getArrayCopy());
             b = makeB(i);
             theResult = solve_lu_b(p, b);
-            error = multiply(p, theResult.getX());
+            error = multiply(pCopy, theResult.getX());
             error.minusEquals(b);
             System.out.println("------------------");
             System.out.println("n = " + i);
@@ -414,11 +356,12 @@ public class SymmetricPascalMatrix {
         // HouseHolder
         for (int i = 2; i <= 12; i++) {
             p = makeP(i);
+            Matrix pCopy = new Matrix(p.getArrayCopy());
             b = makeB(i);
             theResult = solve_qr_b(p, b);
-            error = multiply(p, theResult.getXHouse());
+            error = multiply(pCopy, theResult.getXHouse());
             error.minusEquals(b);
-            error2 = multiply(p, theResult.getXGivens());
+            error2 = multiply(pCopy, theResult.getXGivens());
             error.minusEquals(b);
             System.out.println("------------------");
             System.out.println("n = " + i);
