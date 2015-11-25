@@ -1,10 +1,12 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 import Jama.Matrix;
 
 //http://college.cengage.com/mathematics/larson/elementary_linear/5e/students/ch08-10/chap_10_3.pdf
+//This is the way I implemented the power method
 public class Power {
 	static double[] dets = new double[1000];
 	static double[] traces = new double[1000];
@@ -20,8 +22,10 @@ public class Power {
 	static boolean inverse = false;
 	static FileWriter writer = null;
 	static int numfail = 0;
+	static int numfailI = 0;
 	static boolean input = false;
 
+	//generates n 2x2 matricies
 	public static Matrix[] make2x2(int n) {
 		Matrix[] ans = new Matrix[n];
 		for (int i = 0; i < n; i++) {
@@ -34,7 +38,7 @@ public class Power {
 		}
 		return ans;
 	}
-
+	//multiplies two matricies or a 2x2 matrix or a vector
 	public static Matrix multiply(Matrix a, Matrix b) {
 		if (a.getColumnDimension() == b.getRowDimension()) {
 			Matrix ans = new Matrix(a.getRowDimension(), b.getColumnDimension());
@@ -96,7 +100,11 @@ public class Power {
 			}
 			lastAns = new Matrix(u.getArrayCopy());
 		}
-		numfail++;
+		if(!inverse) {
+			numfail++;
+		} else {
+			numfailI++;
+		}
 		if (input) {
 			System.out.println("For given matrix");
 			a.print(2,5);
@@ -106,7 +114,7 @@ public class Power {
 	}
 
 	private static double rayleigh(Matrix a, Matrix x) {
-		return Math.round(dotProduct(multiply(a, x), x) / dotProduct(x, x));
+		return dotProduct(multiply(a, x), x) / dotProduct(x, x);
 	}
 
 	private static double dotProduct(Matrix a, Matrix b) {
@@ -135,6 +143,7 @@ public class Power {
 			}
 			return true;
 		}
+		System.out.println("error in size of matricies");
 		return false;
 	}
 
@@ -166,8 +175,44 @@ public class Power {
 	private static double determinateOf2x2(Matrix m) {
 		return (1 / (m.get(0, 0) * m.get(1, 1) - m.get(1, 0) * m.get(0, 1)));
 	}
-
-	public static void main(String[] args) {
+	public static Matrix readDat(String message) throws IOException{
+        Scanner sc = new Scanner(System.in);
+        System.out.print(message);
+        String fileName = sc.next();
+        File theFile = new File(fileName);
+        Scanner sc2 = new Scanner(theFile);
+        Scanner sc4 = new Scanner(theFile);
+        Scanner sc3;
+        int i = 0;
+        int j = 0;
+        int rows = 0;
+        int columns = 0;
+        while (sc2.hasNextLine()) {
+            rows++;
+            String line = sc2.nextLine();
+            if (columns == 0) {
+                sc3 = new Scanner(line);
+                while (sc3.hasNextDouble()) {
+                    sc3.nextDouble();
+                    columns++;
+                }
+            }
+        }
+        double[][] data = new double[rows][columns];
+        while (sc4.hasNextLine()) {
+            String line = sc4.nextLine();
+                sc3 = new Scanner(line);
+                while (sc3.hasNextDouble()) {
+                    data[i][j] = sc3.nextDouble();
+                    j++;
+                }
+                j = 0;
+                i++;
+        }
+        Matrix a = new Matrix(data);
+        return a;
+    }
+	public static void main(String[] args) throws IOException{
 		File file = new File("answer.txt");
 		try {
 			writer = new FileWriter(file);
@@ -250,8 +295,7 @@ public class Power {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace(); // I'd rather declare method with throws
-									// IOException and omit this catch.
+			System.out.println("errorrrr");	
 		} finally {
 			if (writer != null)
 				try {
@@ -260,54 +304,12 @@ public class Power {
 				}
 		}
 		System.out.printf("File holding the information on the generated matricies is located at %s%n", file.getAbsolutePath());
-		System.out.println(numfail + "failed");
 		input = true;
+		
+		Matrix m = readDat("Enter the file name you want read");
+		double[][] mat2 = { { 1 }, { 1 } };
+		Matrix a = new Matrix(mat2);
+		power_method(m, a, .00005, 100);
 
-//		double[][] mat2 = { { 1 }, { 1 } };
-//		Matrix a = new Matrix(mat2);
-//
-//		Matrix[] mat = make2x2(1000);
-//		Matrix[] matI = new Matrix[1000];
-//		for (int i = 0; i < 1000; i++) {
-//			matI[i] = inverse2x2(mat[i]);
-//			System.out.println((i + 1) + "th power method");
-//			iterations[i] = power_method(mat[i], a, .00005, 100);
-//			dets[i] = determinateOf2x2(mat[i]);
-//			traces[i] = trace(mat[i]);
-//			System.out.println((i + 1) + "th power method inverse");
-//			iterationsI[i] = power_method(matI[i], a, .00005, 100);
-//			detsI[i] = determinateOf2x2(matI[i]);
-//			tracesI[i] = trace(matI[i]);
-//		}
-
-		// System.out.println("Iterations");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(iterations[i]+ " ");
-		// }
-		// System.out.println();
-		// System.out.println("dets");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(dets[i]+ " ");
-		// }
-		// System.out.println();
-		// System.out.println("Traces");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(traces[i]+ " ");
-		// }
-		// System.out.println();
-		// System.out.println("Iterations I");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(iterationsI[i]+ " ");
-		// }
-		// System.out.println();
-		// System.out.println("dets I");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(detsI[i]+ " ");
-		// }
-		// System.out.println();
-		// System.out.println("Traces I");
-		// for(int i = 0; i < 1000; i++) {
-		// System.out.println(tracesI[i]+ " ");
-		// }
 	}
 }
