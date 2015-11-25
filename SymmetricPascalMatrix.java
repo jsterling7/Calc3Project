@@ -310,6 +310,7 @@ public class SymmetricPascalMatrix {
         // For Givens
         y = multiply(qGivens.transpose(), b);
         Matrix x2 = new Matrix(b.getRowDimension(), 1);
+        for (int i = b.getRowDimension() - 1; i >= 0; i--) {
             double temp = y.get(i,0);
             for (int j = i + 1; j < b.getRowDimension(); j++) {
                  temp -= (rGivens.get(i, j) * x.get(j, 0));
@@ -548,5 +549,4 @@ public class SymmetricPascalMatrix {
             this.errorGivens = error;
         }
     }
-
 }
