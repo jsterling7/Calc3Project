@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-
 import Jama.Matrix;
 
 //http://college.cengage.com/mathematics/larson/elementary_linear/5e/students/ch08-10/chap_10_3.pdf
@@ -306,7 +305,7 @@ public class Power {
 		System.out.printf("File holding the information on the generated matricies is located at %s%n", file.getAbsolutePath());
 		input = true;
 		
-		Matrix m = readDat("Enter the file name you want read");
+		Matrix m = readDat("Enter the file name you want read \n");
 		double[][] mat2 = { { 1 }, { 1 } };
 		Matrix a = new Matrix(mat2);
 		power_method(m, a, .00005, 100);
