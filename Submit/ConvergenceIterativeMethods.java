@@ -42,10 +42,10 @@ public class ConvergenceIterativeMethods {
             averageSteps += answers[i].getIterations();
             totalSteps += answers[i].getIterations();
         }
-        // System.out.println("Gauss Average Answer X");
+        System.out.println("Gauss Average X: ");
         averageSteps /= (double) (100);
         theAverage.timesEquals(((double) 1 /100));
-        // theAverage.print(2, 10);
+        theAverage.print(2, 10);
         System.out.println("Gauss Average Iterations: " + averageSteps);
         System.out.println("");
         System.out.println("Gauss Total Iterations: " + totalSteps);
@@ -69,6 +69,10 @@ public class ConvergenceIterativeMethods {
         actualTotal.set(0, 0, (double) 9 / 190);
         actualTotal.set(1, 0, (double) 28 / 475);
         actualTotal.set(2, 0, (double) 33 / 475);
+        System.out.println("Jacobi Average X: ");
+        approxTotal.timesEquals((double) 1 / 100);
+        approxTotal.print(4,4);
+        System.out.println("");
         System.out.println("Jacobi Average Iterations: " + (averIterations / 100));
         System.out.println("");
         System.out.println("Jacobi Total Iterations: " + averIterations);
